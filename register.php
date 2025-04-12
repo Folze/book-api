@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if (empty($email) || empty($password)) {
         http_response_code(400);
-        echo json_encode(['error' => 'Email и пароль обязательны']);
+        error_log( json_encode(['error' => 'Email и пароль обязательны']));
         exit;
     }
 
@@ -18,9 +18,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $result = $user->register($email, $password);
 
     if ($result['success']) {
-        echo json_encode(['success' => true, 'user_id' => $result['id']]);
+        error_log(json_encode(['success' => true, 'user_id' => $result['id']]));
     } else {
         http_response_code(400);
-        echo json_encode(['error' => $result['error']]);
+        error_log( json_encode(['error' => $result['error']]));
     }
 }

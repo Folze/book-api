@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../Core/DataBase.php';
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../Core/Config.php';
+$config = require __DIR__ . '/../Core/Config.php';
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
@@ -18,7 +18,7 @@ try {
     $user_id = $decoded->user_id;
 } catch (Exception $e) {
     http_response_code(401);
-    echo json_encode(['error' => 'Неавторизованный доступ']);
+    error_log( json_encode(['error' => 'Неавторизованный доступ']));
     exit;
 }
 
@@ -35,22 +35,22 @@ switch ($method) {
         
         if (!$data) {
             http_response_code(400);
-            echo json_encode(['error' => 'Нет данных']);
+            error_log( json_encode(['error' => 'Нет данных']));
             break;
         }
         if (!$title || !$author) {
             http_response_code(400);
-            echo json_encode(['error' => 'Поле title и author обязательны']);
+            error_log( json_encode(['error' => 'Поле title и author обязательны']));
             break;
         }
 
         try {
             $stmt = $pdo->prepare("INSERT INTO books (user_id, title, author, genre, year, description) VALUES (?, ?, ?, ?, ?, ?)");
             $stmt->execute([$user_id, $title, $author, $genre, $year, $description]);
-            echo json_encode(['success' => true, 'book_id' => $pdo->lastInsertId()]);
+            error_log( json_encode(['success' => true, 'book_id' => $pdo->lastInsertId()]));
         } catch (PDOException $e) {
             http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
+            error_log( json_encode(['error' => $e->getMessage()]));
         }
         break;
 
@@ -64,7 +64,7 @@ switch ($method) {
             $response = @file_get_contents($api_url);
             if ($response === FALSE) {
                 http_response_code(500);
-                echo json_encode(['error' => 'Ошибка при запросе к Google Books']);
+                error_log( json_encode(['error' => 'Ошибка при запросе к Google Books']));
                 break;
             }
             
@@ -77,7 +77,7 @@ switch ($method) {
                 ];
             }, $data['items'] ?? []);
             
-            echo json_encode(['books' => $books]);
+            error_log( json_encode(['books' => $books]));
         } else {
             // Получение книг из базы данных
             try {
@@ -88,21 +88,21 @@ switch ($method) {
                     $book = $stmt->fetch(PDO::FETCH_ASSOC);
 
                     if ($book) {
-                        echo json_encode(['success' => true, 'book' => $book]);
+                        error_log( json_encode(['success' => true, 'book' => $book]));
                     } else {
                         http_response_code(404);
-                        echo json_encode(['error' => 'Книга не найдена']);
+                        error_log( json_encode(['error' => 'Книга не найдена']));
                     }
                 } else {
                     $stmt = $pdo->prepare("SELECT * FROM books WHERE user_id = ? AND is_deleted = FALSE");
                     $stmt->execute([$user_id]);
                     $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                    echo json_encode(['success' => true, 'books' => $books]);
+                    error_log( json_encode(['success' => true, 'books' => $books]));
                 }
             } catch (PDOException $e) {
                 http_response_code(500);
-                echo json_encode(['error' => $e->getMessage()]);
+                error_log( json_encode(['error' => $e->getMessage()]));
             }
         }
         break;
@@ -113,7 +113,7 @@ switch ($method) {
 
         if (!$id) {
             http_response_code(400);
-            echo json_encode(['error' => 'Не указан ID книги для обновления']);
+            error_log( json_encode(['error' => 'Не указан ID книги для обновления']));
             break;
         }
 
@@ -121,7 +121,7 @@ switch ($method) {
 
         if (!$data) {
             http_response_code(400);
-            echo json_encode(['error' => 'Нет данных для обновления']);
+            error_log( json_encode(['error' => 'Нет данных для обновления']));
             break;
         }
 
@@ -145,14 +145,14 @@ switch ($method) {
             ]);
 
             if ($stmt->rowCount()) {
-                echo json_encode(['success' => true, 'message' => 'Книга обновлена']);
+                error_log( json_encode(['success' => true, 'message' => 'Книга обновлена']));
             } else {
                 http_response_code(404);
-                echo json_encode(['error' => 'Книга не найдена или данные те же']);
+                error_log( json_encode(['error' => 'Книга не найдена или данные те же']));
             }
         } catch (PDOException $e) {
             http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
+            error_log( json_encode(['error' => $e->getMessage()]));
         }
         break;
 
@@ -166,18 +166,18 @@ switch ($method) {
                 $stmt->execute([$id, $user_id]);
                 
                 if ($stmt->rowCount()) {
-                    echo json_encode(['success' => true, 'message' => 'Книга восстановлена']);
+                    error_log( json_encode(['success' => true, 'message' => 'Книга восстановлена']));
                 } else {
                     http_response_code(404);
-                    echo json_encode(['error' => 'Книга не найдена или уже восстановлена']);
+                    error_log( json_encode(['error' => 'Книга не найдена или уже восстановлена']));
                 }
             } catch (PDOException $e) {
                 http_response_code(500);
-                echo json_encode(['error' => $e->getMessage()]);
+                error_log( json_encode(['error' => $e->getMessage()]));
             }
         } else {
             http_response_code(400);
-            echo json_encode(['error' => 'Неверный запрос']);
+            error_log( json_encode(['error' => 'Неверный запрос']));
         }
         break;
 
@@ -187,7 +187,7 @@ switch ($method) {
 
         if (!$id) {
             http_response_code(400);
-            echo json_encode(['error' => 'Не указан ID книги для удаления']);
+            error_log( json_encode(['error' => 'Не указан ID книги для удаления']));
             break;
         }
 
@@ -196,19 +196,19 @@ switch ($method) {
             $stmt->execute([$id, $user_id]);
 
             if ($stmt->rowCount()) {
-                echo json_encode(['success' => true, 'message' => 'Книга помечена как удаленная']);
+                error_log( json_encode(['success' => true, 'message' => 'Книга помечена как удаленная']));
             } else {
                 http_response_code(404);
-                echo json_encode(['error' => 'Книга не найдена']);
+                error_log( json_encode(['error' => 'Книга не найдена']));
             }
         } catch (PDOException $e) {
             http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
+            error_log( json_encode(['error' => $e->getMessage()]));
         }
         break;
 
     default:
         http_response_code(405);
-        echo json_encode(['error' => 'Метод не поддерживается']);
+        error_log( json_encode(['error' => 'Метод не поддерживается']));
         break;
 }

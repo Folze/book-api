@@ -1,5 +1,6 @@
 <?php 
-require_once '//Core/DataBase.php';
+require_once __DIR__ . '/../Core/DataBase.php';
+
 
 $createBooksTable = "CREATE TABLE IF NOT EXISTS books (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -16,7 +17,6 @@ $createBooksTable = "CREATE TABLE IF NOT EXISTS books (
 
 try {
     $pdo->exec($createBooksTable);
-    echo "<p>Таблица 'books' создана или уже существует</p>";
 } catch (PDOException $e) {
     echo "<p>Ошибка при создании таблицы: " . $e->getMessage() . "</p>";
 }

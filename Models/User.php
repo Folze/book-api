@@ -1,5 +1,6 @@
 <?php
-require_once '//Core/DataBase.php';
+require_once __DIR__ . '/../Core/DataBase.php';
+
 
 
 $createUsersTable = "
@@ -44,7 +45,7 @@ class User {
         try {
             $stmt = $this->pdo->prepare("INSERT INTO users (email, password) VALUES (?, ?)");
             $stmt->execute([$email, $hash]);
-            return ['success' => true, 'id' => $this->pdo->lastInsertId()];
+            return ['success' => true, 'message' => 'Пользователь зарегистрирован'];
         } catch (PDOException $e) {
             return ['success' => false, 'error' => 'Email уже занят'];
         }
