@@ -1,8 +1,9 @@
 <?php
+
 $host = 'localhost';
 $db   = 'my_first_db';
 $user = 'root';
-$pass = 'root'; 
+$pass = 'root';
 
 // Подключение к базе данных
 try {
@@ -11,6 +12,3 @@ try {
 } catch (PDOException $e) {
     die('Ошибка подключения: ' . $e->getMessage());
 }
-
-
-
